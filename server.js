@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 import express from "express";
 import cors from "cors"
 import morgan from "morgan";
-
+import "express-async-errors";
 // file imports
 import connectDB from "./config/db.js";
 
