@@ -60,7 +60,9 @@ export const loginController = async (req, res,next) => {
     if (!isMatch) {
       next("Invalid Username or password");
     }
+    
     const token = user.createJWT();
+    
     res.status(200).send({
       success: true,
       message: "User login successfully",
