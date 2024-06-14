@@ -41,41 +41,36 @@ export const registerController = async (req, res, next) => {
   }
 };
 
-export const loginController = async (req, res,next) => {
-  try {
-    const { email, password } = req.body;
+export const loginController = async (req, res, next) => {
+  const { email, password } = req.body;
 
-    // validation
-    if (!email || !password) {
-      next("Please provide all fields");
-    }
-    // find user by email
-    const user = await userModel.findOne({ email }).select("+password")
-    if (!user) {
-      next("Invalid Username or password");
-    }
-    user.password = undefined;
-    // compare password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      next("Invalid Username or password");
-    }
-    
-    const token = user.createJWT();
-    
-    res.status(200).send({
-      success: true,
-      message: "User login successfully",
-      user: {
-        name: user.name,
-        lastName: user.lastName,
-        email: user.email,
-        location: user.location,
-      },
-      token,
-    });
-
-  } catch (error) {
-
+  // validation
+  if (!email || !password) {
+    next("Please provide all fields");
   }
+  // find user by email
+  const user = await userModel.findOne({ email }).select("+password");
+  if (!user) {
+    next("Invalid Username or password");
+  }
+  user.password = undefined;
+  // compare password
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    next("Invalid Username or password");
+  }
+
+  const token = user.createJWT();
+
+  res.status(200).send({
+    success: true,
+    message: "User login successfully",
+    user: {
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+      location: user.location,
+    },
+    token,
+  });
 };
