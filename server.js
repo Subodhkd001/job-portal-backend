@@ -36,6 +36,7 @@ app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/user", userRouter)
 app.use("/api/v1/job", jobsRoutes)
 
+
 // validation middleware
 app.use(errorMiddleware);
 

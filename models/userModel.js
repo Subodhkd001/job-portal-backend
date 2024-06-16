@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 // schema
-
+ 
 const userSchema = new mongoose.Schema(
   {
     name: {
