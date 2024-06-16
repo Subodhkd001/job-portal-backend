@@ -1,4 +1,6 @@
 import jobsModel from "../models/jobsModel.js";
+import mongoose from 'mongoose';
+import moment from "moment";
 
 // ======== CREATE JOBS ========
 export const createJobController = async (req, res, next) => {
@@ -37,7 +39,7 @@ export const updateJobController = async (req, res, next) => {
   // find job
   const job = await jobsModel.findOne({ _id: id });
 
-  // validation
+  // validation 
   if (!job) {
     next(`No job found with this id ${id}`);
   }
@@ -72,3 +74,57 @@ export const deleteJobController = async (req, res, next) => {
   await job.deleteOne();
   res.status(200).json({ msg: "Job deleted successfully" });
 };
+
+
+// ======= JOBS STATS AND FILTER ===========
+
+export const jobStatsController = async (req, res, next) => {
+  const stats = await jobsModel.aggregate([
+    // search by user jobs
+    {
+      $match:{
+        // ismee hame batana padta hai iske basis par query perform karna hai
+        createdBy:new mongoose.Types.ObjectId(req.user.userId)
+      }
+    },
+    {
+      $group:{
+        _id: "$status", // group by status
+        count:{$sum:1} // count of jobs
+      },
+    }
+  ])
+  const defaultStats = {
+    pending: stats.pending || 0,
+    interview: stats.interview || 0,
+    declined: stats.declined || 0,
+  }; 
+  
+  // monthly yearly status
+  let monthlyApllication = await jobsModel.aggregate([
+    {
+      $match: {
+        createdBy: new mongoose.Types.ObjectId(req.user.userId),
+      },
+    },
+    {
+      $group:{
+        _id:{
+          year:{$year:"$createdAt"}, // year
+          month:{$month:"$createdAt"}, // month
+        },
+        count:{$sum:1} // count of jobs
+      }
+    }
+  ])
+
+  monthlyApllication = monthlyApllication.map((item)=>{
+    const {_id:{year,month},count} = item;
+    const date = moment().month(month-1).year(year).format("MMM Y");
+    return {date,count}
+  }).reverse();
+
+  res.status(200).json({ totalJobs: stats.length, defaultStats, monthlyApllication});
+}
+
+// aggregate will be the function of arrays which will contain multiple queries
